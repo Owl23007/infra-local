@@ -1,0 +1,53 @@
+apisix:
+  node_listen: 9080
+  enable_admin: true
+  enable_admin_cors: true
+  enable_debug: false
+
+etcd:
+  host:
+    - "http://etcd:2379"
+  prefix: "/apisix"
+  timeout: 30
+
+nginx_config:
+  error_log_level: "warn"
+  error_log: "/tmp/logs/error.log"
+  worker_processes: 2
+
+discovery:
+  nacos:
+    host:
+      - "http://nacos:8848"
+    namespace_id: "public"
+    group_name: "DEFAULT_GROUP"
+    fetch_interval: 30
+    weight: 100
+    timeout:
+      connect: 2000
+      send: 2000
+      read: 5000
+    ssl:
+      verify: false
+
+plugins:
+  - api-breaker
+  - authz-keycloak
+  - cors
+  - echo
+  - fault-injection
+  - http-logger
+  - ip-restriction
+  - limit-conn
+  - limit-count
+  - limit-req
+  - prometheus
+  - proxy-cache
+  - redirect
+  - request-id
+  - request-validation
+  - response-rewrite
+  - serverless-post-function
+  - serverless-pre-function
+  - uri-blocker
+  - zipkin

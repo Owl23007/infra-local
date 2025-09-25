@@ -1,0 +1,7 @@
+# 忽略 logs 和 data 下所有内容，除了 .gitkeep
+nacos/
+etcd/
+
+
+# 忽略本地配置
+.env

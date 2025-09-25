@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  nacos:
+    image: nacos/nacos-server:latest
+    container_name: nacos-standalone
+    restart: always
+    ports:
+      - "8848:8848"
+      - "8081:8080"
+    volumes:
+      - ./nacos/logs:/home/nacos/logs
+      - ./nacos/data:/home/nacos/data
+    env_file:
+      - .env
+    environment:
+      - MODE=standalone
+      - NACOS_AUTH_ENABLE=true
+      - JVM_XMS=512m
+      - JVM_XMX=512m
+      - JVM_XMN=256m
+
+  etcd:
+    image: bitnami/etcd:latest
+    container_name: etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+    ports:
+      - "2379:2379"
+    volumes:
+      - ./etcd:/bitnami/etcd
+
+  apisix:
+    image: apache/apisix:latest
+    container_name: apisix
+    restart: always
+    ports:
+      - "9080:9080"
+      - "9443:9443"
+      - "9180:9180"
+    volumes:
+      - ./apisix/config:/usr/local/apisix/conf
+    env_file:
+      - .env
+    environment:
+      - APISIX_DISCOVERY_NACOS_USERNAME=${NACOS_USER}
+      - APISIX_DISCOVERY_NACOS_PASSWORD=${NACOS_PASSWORD}
+    depends_on:
+      - nacos
+      - etcd
