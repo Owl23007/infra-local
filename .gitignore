@@ -4,9 +4,7 @@ etcd/
 apisix/logs/
 apisix/config/apisix.uid
 apisix/config/cert/
-
-
 # 忽略本地配置
 .env
-
 apisix/config/config.yaml
+

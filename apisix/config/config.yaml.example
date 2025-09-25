@@ -5,22 +5,22 @@ deployment:
   role_traditional:
     config_provider: etcd
 
-  # ===== etcd 配置（APISIX 的配置存储）=====
+  # ===== etcd 配置 =====
   etcd:
     host:
-      - "http://etcd:2379"   # 使用 docker-compose 服务名
+      - "http://etcd:2379"
     prefix: "/apisix"
     timeout: 30
 
   # ===== 服务发现：Nacos =====
   service_discovery:
     nacos:
-      host: "http://nacos:8848"   # 关键！使用服务名 "nacos"
+      host: "http://nacos:8848"
       prefix: "/nacos/v1"
       weight: 100
       timeout: 3
       fetch_interval: 5           # 每5秒拉取一次服务列表
-      # 如果启用鉴权，取消注释以下两行（需与 Nacos 环境变量一致）
+      # 如果启用鉴权，取消注释以下两行
       # username: "nacos"
       # password: "nacos"
 
@@ -28,10 +28,10 @@ deployment:
   admin:
     admin_key:
       - name: "admin"
-        key: "edd1c9f034335f136f87ad84b625c8f1"  # 固定密钥，用于调用 Admin API
+        key: "edd1c9f034335f136f87ad84b625c8f1"  # 固定密钥，用于调用 Admin API, 请勿在生产环境中使用
         role: "admin"
     allow_admin:
-      - 0.0.0.0/0    # 允许所有 IP 访问 Admin API（仅限开发环境！）
+      - 0.0.0.0/0    # 允许所有 IP 访问 Admin API（仅限开发环境）
 
   # ===== 其他可选配置 =====
   nginx_config:
