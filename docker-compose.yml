@@ -7,7 +7,8 @@ services:
     restart: always
     ports:
       - "8848:8848"
-      - "8081:8080"
+      - "9848:9848"
+      - "8080:8080"
     volumes:
       - ./nacos/logs:/home/nacos/logs
       - ./nacos/data:/home/nacos/data
@@ -19,16 +20,31 @@ services:
       - JVM_XMS=512m
       - JVM_XMX=512m
       - JVM_XMN=256m
+      - NACOS_SERVER_IP=127.0.0.1
 
   etcd:
     image: bitnami/etcd:latest
     container_name: etcd
     environment:
       - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ENABLE_V2=false
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER=etcd=http://etcd:2380
+      - ETCD_NAME=etcd
+      - ETCD_ENABLE_GRPC_GATEWAY=true
     ports:
       - "2379:2379"
+      - "2380:2380"
     volumes:
       - ./etcd:/bitnami/etcd
+    healthcheck:
+      test: [ "CMD", "etcdctl", "endpoint", "health", "--endpoints=http://localhost:2379" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   apisix:
     image: apache/apisix:latest
@@ -40,11 +56,14 @@ services:
       - "9180:9180"
     volumes:
       - ./apisix/config:/usr/local/apisix/conf
+      - ./apisix/logs:/usr/local/apisix/logs
     env_file:
       - .env
-    environment:
-      - APISIX_DISCOVERY_NACOS_USERNAME=${NACOS_USER}
-      - APISIX_DISCOVERY_NACOS_PASSWORD=${NACOS_PASSWORD}
     depends_on:
       - nacos
       - etcd
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:9080" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
