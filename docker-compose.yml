@@ -42,7 +42,7 @@ services:
       - "9443:9443"
       - "9180:9180"
     volumes:
-      - ./apisix/config/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ./apisix/config/config.yaml:/usr/local/apisix/conf/config.yaml
     env_file:
       - .env
     depends_on:
