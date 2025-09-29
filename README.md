@@ -10,18 +10,19 @@
 .\script\setup_env.ps1
 ```
 
-### 2. 启动基础设施
-```powershell
-# 启动所有服务
-docker-compose up -d
+### 2. 更新 .env 文件的nacos密码
 
-# 查看服务状态
-docker-compose ps
+```powershell
+# 启动nacos容器
+docker-compose up -d nacos
+# 打开 http://localhost:8080/#/login
+# 登录后修改默认密码，并更新到 .env 文件
 ```
 
 ### 3. 初始化 APISIX 配置
 ```powershell
 # 初始化 APISIX config.yaml 并填充敏感信息
+# 注意：替换 nacos 密码后再运行此脚本，如果没有替换密码，默认密码是 nacos
 .\script\init_config.ps1
 ```
 
@@ -34,7 +35,7 @@ docker-compose ps
 ## 架构组件
 
 ### 核心服务
-- **APISIX** (端口 9080/9443/9180): API 网关
+- **APISIX** (端口 8080/9080/9180): API 网关
 - **Nacos** (端口 8848): 服务发现和配置管理
 - **etcd** (端口 2379): 键值存储
 
