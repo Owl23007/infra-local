@@ -224,6 +224,7 @@ plugins:
 - hmac-auth
 - basic-auth
 - jwt-auth
+- jwks-auth
 - jwe-decrypt
 - key-auth
 - consumer-restriction

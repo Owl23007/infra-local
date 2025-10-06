@@ -43,6 +43,7 @@ services:
       - "9180:9180"
     volumes:
       - ./apisix/config/config.yaml:/usr/local/apisix/conf/config.yaml
+      - ./apisix/plugin/jwks-auth.lua:/usr/local/apisix/apisix/plugins/jwks-auth.lua
     env_file:
       - .env
     depends_on:

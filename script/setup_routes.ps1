@@ -35,15 +35,13 @@ foreach ($svc in $services) {
             "proxy-rewrite" = @{
               regex_uri = @("^/api/$svc/(.*)", '/$1')
             }
-            # 启用 JWT 认证插件
-            "jwt-auth" = @{
-                key = "auth-service"
-                algorithm = "RS256"
-                # 从 auth 服务获取 JWKS
-                jwks_uri = "http://127.0.0.1:9080/api/.well-known/jwks.json"
+            "jwks-auth" = @{
+                            jwks_uri = "http://192.168.56.1:9080/api/.well-known/jwks.json"
+                            issuer    = "auth"
+                            audiences = @($svc)
             }
         }
-    } | ConvertTo-Json -Depth 5
+    } | ConvertTo-Json -Depth 6
 
     Write-Host "Creating route: /api/$svc/* to service:$svc"
     Invoke-WebRequest `
@@ -93,7 +91,7 @@ foreach ($path in $specialPaths) {
         -ContentType "application/json"
 }
 
-#. 为 auth 服务创建 /api/auth/* 路由
+#3. 为 auth 服务创建 /api/auth/* 路由
 
 $svc = "auth"
 $routeBody = @{
@@ -121,6 +119,3 @@ $routeBody = @{
         -Method PUT `
         -Body $routeBody `
         -ContentType "application/json"
-
-
-Invoke-WebRequest -Uri "http://127.0.0.1:9180/apisix/admin/routes/auth-route" -Headers @{ "X-API-KEY" = $adminKey }
