@@ -107,7 +107,7 @@ $routeBody = @{
         }
         plugins = @{
             "proxy-rewrite" = @{
-              regex_uri = @("^/api/$svc/(.*)", '/$1')
+              regex_uri = @("^/api/(.*)", '/$1')
             }
         }
     } | ConvertTo-Json -Depth 5
