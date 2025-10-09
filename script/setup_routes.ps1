@@ -36,7 +36,7 @@ foreach ($svc in $services) {
               regex_uri = @("^/api/$svc/(.*)", '/$1')
             }
             "jwks-auth" = @{
-                            jwks_uri = "http://192.168.56.1:9080/api/.well-known/jwks.json"
+                            jwks_uri = "http://127.0.0.1:9080/api/.well-known/jwks.json"
                             issuer    = "auth"
                             audiences = @($svc)
             }
