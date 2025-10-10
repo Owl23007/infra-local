@@ -21,16 +21,19 @@ fi
 
 cp "$SRC" "$DST"
 
-# 读取 .env 内容
+# 读取 .env 内容并解析
 declare -A env_dict
 while IFS='=' read -r key value; do
-    if [[ -n "$key" && -n "$value" ]]; then
+    if [[ "$key" =~ ^[A-Z_]+$ && -n "$value" ]]; then
         env_dict["$key"]="$value"
     fi
-done < "$ENV_FILE"
+done < <(grep '=' "$ENV_FILE")
 
-# 获取 NACOS_PASSWORD（如无则用 nacos），APISIX_ADMIN_KEY
-nacos_password="${env_dict[NACOS_PASSWORD]:-nacos}"
+# 获取环境变量值
+nacos_password="${env_dict[NACOS_PASSWORD]}"
+if [ -z "$nacos_password" ]; then
+    nacos_password="nacos"
+fi
 apisix_admin_key="${env_dict[APISIX_ADMIN_KEY]}"
 apisix_keyring1="${env_dict[APISIX_KEYRING_1]}"
 apisix_keyring2="${env_dict[APISIX_KEYRING_2]}"

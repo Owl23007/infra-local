@@ -16,6 +16,15 @@ if (-not $adminKey) {
     exit 1
 }
 
+$corsPlugin = @{
+    allow_origins = "http://localhost:5173"
+    allow_methods = "GET,POST,PUT,DELETE,OPTIONS"
+    allow_headers = "Content-Type,Authorization,Origin,Refresh-Token"
+    expose_headers = "Content-Length,X-Request-ID,X-RateLimit-Limit"
+    max_age = 300
+    allow_credential = $true
+}
+
 $services = @("linx", "synapse", "audit")
 
 # 1. 为每个服务创建 /api/svc/* 路由
@@ -40,8 +49,14 @@ foreach ($svc in $services) {
                             issuer    = "auth"
                             audiences = @($svc)
             }
+            "cors" = $corsPlugin
         }
     } | ConvertTo-Json -Depth 6
+
+    
+# 在 Invoke-WebRequest 前加一行：
+Write-Host "Debug JSON:" -ForegroundColor Yellow
+Write-Host $routeBody
 
     Write-Host "Creating route: /api/$svc/* to service:$svc"
     Invoke-WebRequest `
@@ -75,6 +90,7 @@ foreach ($path in $specialPaths) {
                 # 匹配 /api/(.*)，重写为 /$1
                regex_uri = @("^/api/(.*)", '/$1')
             }
+            "cors" = $corsPlugin
         }
     } | ConvertTo-Json -Depth 5
 
@@ -109,12 +125,42 @@ $routeBody = @{
             "proxy-rewrite" = @{
               regex_uri = @("^/api/(.*)", '/$1')
             }
+            "cors" = $corsPlugin
         }
     } | ConvertTo-Json -Depth 5
 
     Write-Host "Creating route: /api/$svc/* to service:$svc"
     Invoke-WebRequest `
         -Uri "http://127.0.0.1:9180/apisix/admin/routes/$svc-route" `
+        -Headers @{ "X-API-KEY" = $adminKey } `
+        -Method PUT `
+        -Body $routeBody `
+        -ContentType "application/json"
+
+#4. 创建 /api/linx/ws/* 路由
+$svc = "linx"
+$routeBody = @{
+    uri = "/api/$svc/ws/*"
+     upstream = @{
+            service_name = $svc
+            type = "roundrobin"
+            discovery_type = "nacos"
+            discovery_args = @{
+                group_name = "DEFAULT_GROUP"
+                namespace_id = ""
+            }
+        }
+        plugins = @{
+            "proxy-rewrite" = @{
+              regex_uri = @("^/api/(.*)", '/$1')
+            }
+            "cors" = $corsPlugin
+        }
+    } | ConvertTo-Json -Depth 5
+
+    Write-Host "Creating route: /api/$svc/* to service:$svc"
+    Invoke-WebRequest `
+        -Uri "http://127.0.0.1:9180/apisix/admin/routes/$svc-ws-route" `
         -Headers @{ "X-API-KEY" = $adminKey } `
         -Method PUT `
         -Body $routeBody `

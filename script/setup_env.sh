@@ -61,7 +61,7 @@ echo "Keep this file secure and DO NOT commit to version control!"
 echo ""
 echo "Next Steps:"
 echo "1. Start Nacos: docker-compose up -d nacos"
-echo "2. Access Nacos UI at http://localhost:8848/nacos (default user/pass: nacos/nacos)"
+echo "2. Access Nacos UI at http://localhost:8080/#/login (default user/pass: nacos/nacos)"
 echo "3. Change the password for user 'nacos' in Nacos UI."
 echo "4. Update NACOS_PASSWORD in .env file with the new password."
 echo "5. Restart the containers: docker-compose up -d"
@@ -71,13 +71,13 @@ if [[ "$response" =~ ^[Yy](es)?$ ]]; then
     echo "Starting Nacos container..."
     docker-compose up -d nacos
 
-    health_url="http://localhost:8848/nacos"
+    health_url="http://localhost:8080/#/login"
     max_retries=30
     retry=0
 
     echo "Waiting for Nacos to become ready..."
     while [ $retry -lt $max_retries ]; do
-        if curl -s "$health_url" | grep -q "Nacos"; then
+        if curl -s -f "http://localhost:8080" >/dev/null 2>&1; then
             echo ""
             echo "Nacos started successfully!"
             break

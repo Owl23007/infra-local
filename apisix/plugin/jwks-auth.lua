@@ -208,7 +208,7 @@ local function fetch_jwks(jwks_uri)
         end
         local pem, err = jwk_to_pem(key)
         if pem then
-            core.log.warn("Generated PEM for kid ", key.kid, ":\n", pem)
+            core.log.log("Generated PEM for kid ", key.kid, ":\n", pem)
             local ts = get_kid_timestamp(key.kid)
             pub_keys[key.kid] = pem
             table.insert(kid_with_ts, {kid = key.kid, ts = ts})
