@@ -68,7 +68,7 @@ Write-Host $routeBody
 }
 
 # 2. 为 auth 服务添加带 /api 前缀的特殊路径，并重写
-$specialPaths = @("/.well-known/*", "/password/*", "/registration/*")
+$specialPaths = @("/.well-known/*", "/password/*", "/registration/*","/profile/*")
 
 foreach ($path in $specialPaths) {
     # 客户端访问的路径：/api + $path
@@ -136,32 +136,30 @@ $routeBody = @{
         -Method PUT `
         -Body $routeBody `
         -ContentType "application/json"
-
-#4. 创建 /api/linx/ws/* 路由
+        
+# 4. 创建 /stomp WebSocket 路由
 $svc = "linx"
 $routeBody = @{
-    uri = "/api/$svc/ws/*"
-     upstream = @{
-            service_name = $svc
-            type = "roundrobin"
-            discovery_type = "nacos"
-            discovery_args = @{
-                group_name = "DEFAULT_GROUP"
-                namespace_id = ""
-            }
+    uri = "/stomp"
+    enable_websocket = $true  #启用 WebSocket 支持
+    upstream = @{
+        service_name = $svc
+        type = "roundrobin"
+        discovery_type = "nacos"
+        discovery_args = @{
+            group_name = "DEFAULT_GROUP"
+            namespace_id = ""
         }
-        plugins = @{
-            "proxy-rewrite" = @{
-              regex_uri = @("^/api/(.*)", '/$1')
-            }
-            "cors" = $corsPlugin
-        }
-    } | ConvertTo-Json -Depth 5
+    }
+    plugins = @{
+        "cors" = $corsPlugin
+    }
+} | ConvertTo-Json -Depth 5
 
-    Write-Host "Creating route: /api/$svc/* to service:$svc"
-    Invoke-WebRequest `
-        -Uri "http://127.0.0.1:9180/apisix/admin/routes/$svc-ws-route" `
-        -Headers @{ "X-API-KEY" = $adminKey } `
-        -Method PUT `
-        -Body $routeBody `
-        -ContentType "application/json"
+Write-Host "Creating WebSocket route: /stomp to service:$svc"
+Invoke-WebRequest `
+    -Uri "http://127.0.0.1:9180/apisix/admin/routes/$svc-ws-route" `
+    -Headers @{ "X-API-KEY" = $adminKey } `
+    -Method PUT `
+    -Body $routeBody `
+    -ContentType "application/json"
