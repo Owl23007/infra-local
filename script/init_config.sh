@@ -24,7 +24,7 @@ cp "$SRC" "$DST"
 # 读取 .env 内容并解析
 declare -A env_dict
 while IFS='=' read -r key value; do
-    if [[ "$key" =~ ^[A-Z_]+$ && -n "$value" ]]; then
+    if [[ "$key" =~ ^[A-Z0-9_]+$ && -n "$value" ]]; then
         env_dict["$key"]="$value"
     fi
 done < <(grep '=' "$ENV_FILE")
