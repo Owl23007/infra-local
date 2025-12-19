@@ -4,7 +4,7 @@ set -e  # 遇错退出
 
 # 定位 .env 文件（相对脚本位置）
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_FILE="$SCRIPT_DIR/.env"
+ENV_FILE="$SCRIPT_DIR/../.env"
 
 if [[ ! -f "$ENV_FILE" ]]; then
     echo "Error: .env file not found at $ENV_FILE. Please run setup_env.sh first." >&2
