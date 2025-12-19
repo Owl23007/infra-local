@@ -42,6 +42,7 @@ $config = $config -replace "<password>", $nacosPassword
 $config = $config -replace "<APISIX_ADMIN_KEY>", $apisixAdminKey
 $config = $config -replace "<APISIX_KEYRING_1>", $apisixKeyring1
 $config = $config -replace "<APISIX_KEYRING_2>", $apisixKeyring2
+$config = $config -replace "<replace_with_password_here>", $nacosPassword
 Set-Content $dst $config
 
 Write-Host "`nGenerated config.yaml and automatically filled sensitive information." -ForegroundColor Cyan

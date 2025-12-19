@@ -43,6 +43,7 @@ sed -i "s|<password>|$nacos_password|g" "$DST"
 sed -i "s|<APISIX_ADMIN_KEY>|$apisix_admin_key|g" "$DST"
 sed -i "s|<APISIX_KEYRING_1>|$apisix_keyring1|g" "$DST"
 sed -i "s|<APISIX_KEYRING_2>|$apisix_keyring2|g" "$DST"
+sed -i "s|<replace_with_password_here>|$nacos_password|g" "$DST"
 
 echo ""
 echo "Generated config.yaml and automatically filled sensitive information."
