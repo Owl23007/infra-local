@@ -1,24 +1,25 @@
 #!/bin/bash
 
-set -e  # 遇错退出
+set -e
 
-# 定位 .env 文件（相对脚本位置）
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/../.env"
 
 if [[ ! -f "$ENV_FILE" ]]; then
-    echo "Error: .env file not found at $ENV_FILE. Please run setup_env.sh first." >&2
+    echo "Error: .env file not found at $ENV_FILE" >&2
     exit 1
 fi
 
-# 从 .env 中提取 APISIX_ADMIN_KEY（支持值中含 = 的情况）
-APISIX_ADMIN_KEY=$(grep -E '^APISIX_ADMIN_KEY=' "$ENV_FILE" | cut -d '=' -f2-)
+# 修复：安全提取并清理 key
+APISIX_ADMIN_KEY=$(grep -E '^APISIX_ADMIN_KEY=' "$ENV_FILE" | cut -d '=' -f2- | tr -d '\r\n' | xargs)
 if [[ -z "$APISIX_ADMIN_KEY" ]]; then
-    echo "Error: APISIX_ADMIN_KEY not found in .env file." >&2
+    echo "Error: APISIX_ADMIN_KEY not found or empty." >&2
     exit 1
 fi
 
-# CORS 配置（用 jq 构建）
+echo "Using APISIX_ADMIN_KEY: [hidden for security]"
+
+# CORS 配置（只需构建一次）
 cors_plugin=$(jq -n \
     --arg origins "http://localhost:5173" \
     --arg methods "GET,POST,PUT,DELETE,OPTIONS" \
@@ -36,9 +37,10 @@ cors_plugin=$(jq -n \
     }'
 )
 
-# 1. 为每个服务创建 /api/svc/* 路由
+# 1. 为每个服务创建路由
 services=("linx" "synapse" "audit")
 for svc in "${services[@]}"; do
+    # 关键：传入 svc 变量给 jq
     route_body=$(jq -n \
         --arg uri "/api/$svc/*" \
         --arg svc_name "$svc" \
@@ -78,7 +80,7 @@ for svc in "${services[@]}"; do
     echo
 done
 
-# 2. 为 auth 服务添加特殊路径（带 /api 前缀）
+# 2. 特殊路径（无需 svc 变量，已硬编码 "auth"）
 special_paths=("/.well-known/*" "/password/*" "/registration/*" "/profile/*")
 for path in "${special_paths[@]}"; do
     public_uri="/api$path"
@@ -107,7 +109,7 @@ for path in "${special_paths[@]}"; do
             }
         }')
 
-    echo "Creating API route: $public_uri → auth (rewritten to $path)"
+    echo "Creating API route: $public_uri → auth"
     curl -X PUT "http://127.0.0.1:9180/apisix/admin/routes/$route_name" \
         -H "X-API-KEY: $APISIX_ADMIN_KEY" \
         -H "Content-Type: application/json" \
@@ -115,7 +117,7 @@ for path in "${special_paths[@]}"; do
     echo
 done
 
-# 3. 为 auth 服务创建通用 /api/auth/* 路由
+# 3. /api/auth/* 路由
 svc="auth"
 route_body=$(jq -n \
     --arg uri "/api/$svc/*" \
@@ -123,7 +125,7 @@ route_body=$(jq -n \
     '{
         uri: $uri,
         upstream: {
-            service_name: $svc,
+            service_name: "auth",
             type: "roundrobin",
             discovery_type: "nacos",
             discovery_args: {
@@ -146,7 +148,7 @@ curl -X PUT "http://127.0.0.1:9180/apisix/admin/routes/${svc}-route" \
     -d "$route_body"
 echo
 
-# 4. 创建 /stomp WebSocket 路由（用于 linx）
+# 4. WebSocket 路由
 svc="linx"
 route_body=$(jq -n \
     --arg uri "/stomp" \
@@ -175,4 +177,4 @@ curl -X PUT "http://127.0.0.1:9180/apisix/admin/routes/${svc}-ws-route" \
     -d "$route_body"
 echo
 
-echo "✅ All routes configured successfully."
+echo "✅ All routes configured."
