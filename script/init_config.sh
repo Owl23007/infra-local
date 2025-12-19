@@ -39,10 +39,10 @@ apisix_keyring1="${env_dict[APISIX_KEYRING_1]}"
 apisix_keyring2="${env_dict[APISIX_KEYRING_2]}"
 
 # 替换 config.yaml 内容
-sed -i "s/<password>/$nacos_password/g" "$DST"
-sed -i "s/<APISIX_ADMIN_KEY>/$apisix_admin_key/g" "$DST"
-sed -i "s/<APISIX_KEYRING_1>/$apisix_keyring1/g" "$DST"
-sed -i "s/<APISIX_KEYRING_2>/$apisix_keyring2/g" "$DST"
+sed -i "s|<password>|$nacos_password|g" "$DST"
+sed -i "s|<APISIX_ADMIN_KEY>|$apisix_admin_key|g" "$DST"
+sed -i "s|<APISIX_KEYRING_1>|$apisix_keyring1|g" "$DST"
+sed -i "s|<APISIX_KEYRING_2>|$apisix_keyring2|g" "$DST"
 
 echo ""
 echo "Generated config.yaml and automatically filled sensitive information."
