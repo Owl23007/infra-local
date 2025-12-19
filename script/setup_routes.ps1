@@ -54,7 +54,6 @@ foreach ($svc in $services) {
     } | ConvertTo-Json -Depth 6
 
     
-# 在 Invoke-WebRequest 前加一行：
 Write-Host "Debug JSON:" -ForegroundColor Yellow
 Write-Host $routeBody
 
@@ -94,7 +93,6 @@ foreach ($path in $specialPaths) {
         }
     } | ConvertTo-Json -Depth 5
 
-    # 生成合法的 route ID（避免特殊字符）
     $cleanPath = ($publicUri -replace "[^a-zA-Z0-9]", "-").Trim("-")
     $routeName = "auth-api-special-$cleanPath"
 

@@ -2,8 +2,8 @@
 
 # 初始化 APISIX config.yaml 并自动填充敏感信息
 
-SRC="./apisix/config/config.yaml.example"
-DST="./apisix/config/config.yaml"
+SRC="../apisix/config/config.yaml.example"
+DST="../apisix/config/config.yaml"
 ENV_FILE=".env"
 
 if [ ! -f "$ENV_FILE" ]; then

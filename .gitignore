@@ -8,3 +8,4 @@ apisix/config/cert/
 .env
 apisix/config/config.yaml
 
+redis/
