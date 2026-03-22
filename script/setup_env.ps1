@@ -63,7 +63,7 @@ APISIX_KEYRING_2=$apisixKeyring2
 "@
 
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-#[System.IO.File]::WriteAllText("$PWD\.env", $envContent, $utf8NoBom)
+[System.IO.File]::WriteAllText("$PWD\.env", $envContent, $utf8NoBom)
 
 Write-Host "`n.env file generated successfully at: $PWD\.env" -ForegroundColor Cyan
 Write-Host "Keep this file secure and DO NOT commit to version control!" -ForegroundColor Yellow
